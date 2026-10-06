@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Track Order Live | SAVORA</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="brand-logo">
+        <div class="brand-icon"><i class="fa-solid fa-leaf"></i></div>
+        <span>SAVORA</span>
+        <span class="brand-badge">Live Tracking</span>
+      </a>
+
+      <div class="nav-actions">
+        <a href="profile.html#orders" class="nav-link-btn">
+          <i class="fa-solid fa-list-check"></i>
+          <span>My Orders</span>
+        </a>
+        <a href="index.html" class="nav-link-btn">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </a>
+        <div id="nav-auth-container"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Live Tracking Content -->
+  <main class="container" style="padding: 32px 20px 64px; max-width: 860px;">
+    
+    <div id="order-loading-view" style="text-align: center; padding: 60px 20px;">
+      <i class="fa-solid fa-spinner fa-spin fa-3x" style="color: var(--primary);"></i>
+      <h3 style="margin-top: 16px;">Locating your SAVORA order...</h3>
+    </div>
+
+    <div id="order-error-view" style="display: none; text-align: center; padding: 60px 20px; background: white; border-radius: var(--radius-xl); border: 1px solid var(--border-color);">
+      <i class="fa-solid fa-triangle-exclamation fa-3x" style="color: #f59e0b; margin-bottom: 12px;"></i>
+      <h2 style="font-size: 1.6rem; margin-bottom: 8px;">Order Not Found</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 24px;">We couldn't retrieve the specified order. Check your order list in your profile.</p>
+      <a href="profile.html#orders" class="btn-submit" style="display: inline-flex; width: auto; padding: 12px 28px;">Go to My Orders</a>
+    </div>
+
+    <!-- Active Tracking Card -->
+    <div id="order-content-view" style="display: none;">
+      
+      <!-- Top Order Summary Banner -->
+      <div style="background: white; border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 28px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Order Tracking</span>
+            <h1 style="font-size: 1.7rem; color: var(--text-primary); margin-top: 2px;" id="track-order-id">SAV-2026-XXXX</h1>
+            <p style="font-size: 0.88rem; color: var(--text-secondary);" id="track-store-info">Ordering from SAVORA</p>
+          </div>
+          <div style="text-align: right;">
+            <div id="track-status-pill" class="order-status-badge Placed" style="font-size: 0.9rem; padding: 6px 14px;">Placed</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" id="track-order-time">Just now</div>
+          </div>
+        </div>
+
+        <!-- Visual Tracking Stepper -->
+        <div class="tracking-stepper">
+          <div class="tracking-progress-fill" id="track-progress-bar" style="width: 10%;"></div>
+          
+          <div class="step-node" id="step-node-1">
+            <div class="step-circle"><i class="fa-solid fa-receipt"></i></div>
+            <span class="step-label">Order Placed</span>
+          </div>
+
+          <div class="step-node" id="step-node-2">
+            <div class="step-circle"><i class="fa-solid fa-thumbs-up"></i></div>
+            <span class="step-label">Confirmed</span>
+          </div>
+
+          <div class="step-node" id="step-node-3">
+            <div class="step-circle"><i class="fa-solid fa-fire-burner"></i></div>
+            <span class="step-label">Preparing / Packing</span>
+          </div>
+
+          <div class="step-node" id="step-node-4">
+            <div class="step-circle"><i class="fa-solid fa-motorcycle"></i></div>
+            <span class="step-label">Out for Delivery</span>
+          </div>
+
+          <div class="step-node" id="step-node-5">
+            <div class="step-circle"><i class="fa-solid fa-house-chimney-check"></i></div>
+            <span class="step-label">Delivered</span>
+          </div>
+        </div>
+
+        <!-- Live Status Message -->
+        <div style="background: var(--primary-light); border: 1px solid var(--primary-subtle); border-radius: var(--radius-md); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <i class="fa-solid fa-bell" style="color: var(--primary); font-size: 1.1rem;"></i>
+            <span id="track-status-message" style="font-size: 0.9rem; font-weight: 600; color: var(--primary-hover);">
+              Restaurant is preparing your delicious order.
+            </span>
+          </div>
+
+          <!-- Interactive Demo Button to Advance Live Order Pipeline -->
+          <button class="add-btn" id="advance-demo-status-btn" onclick="handleAdvanceStatus()" style="white-space: nowrap; font-size: 0.78rem; padding: 6px 12px;">
+            <i class="fa-solid fa-forward-step"></i> Demo: Next Stage
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Delivery Partner Card -->
+      <div id="delivery-partner-card" style="background: white; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; box-shadow: var(--shadow-xs);">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i class="fa-solid fa-helmet-safety"></i>
+          </div>
+          <div>
+            <h4 style="font-size: 1.05rem;" id="partner-name">Rahul Kumar</h4>
+            <p style="font-size: 0.8rem; color: var(--text-secondary);"><i class="fa-solid fa-motorcycle"></i> Vehicle: <span id="partner-vehicle">KA-05-EV-4092</span></p>
+          </div>
+        </div>
+
+        <a href="tel:+919876543210" class="filter-btn" style="color: var(--primary); border-color: var(--primary);">
+          <i class="fa-solid fa-phone"></i> Call Partner
+        </a>
+      </div>
+
+      <!-- Items List & Order Breakdown -->
+      <div style="background: white; border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 28px; box-shadow: var(--shadow-sm); margin-bottom: 24px;">
+        <h3 style="font-size: 1.2rem; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light);">
+          Ordered Items
+        </h3>
+
+        <div id="track-items-list" style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Receipt Bill -->
+        <div style="background: var(--bg-surface); border-radius: var(--radius-md); padding: 18px; border: 1px solid var(--border-color);">
+          <div class="cart-bill-row">
+            <span>Item Subtotal</span>
+            <span id="track-subtotal">₹0</span>
+          </div>
+          <div class="cart-bill-row">
+            <span>Delivery Fee</span>
+            <span id="track-delivery">₹0</span>
+          </div>
+          <div class="cart-bill-row">
+            <span>Platform Fee</span>
+            <span>₹5</span>
+          </div>
+          <div class="cart-bill-row" id="track-discount-row" style="color: var(--primary); font-weight: 700;">
+            <span id="track-discount-label">Coupon Discount</span>
+            <span id="track-discount">-₹0</span>
+          </div>
+          <div class="cart-bill-row total" style="margin-bottom: 0;">
+            <span>Total Paid</span>
+            <span id="track-total" style="color: var(--primary);">₹0</span>
+          </div>
+        </div>
+
+        <!-- Address & Payment info -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; font-size: 0.85rem;">
+          <div style="background: var(--bg-page); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <strong style="display: block; margin-bottom: 4px; color: var(--text-primary);"><i class="fa-solid fa-location-dot"></i> Delivery Address</strong>
+            <p id="track-address-text" style="color: var(--text-secondary); line-height: 1.35;"></p>
+          </div>
+
+          <div style="background: var(--bg-page); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <strong style="display: block; margin-bottom: 4px; color: var(--text-primary);"><i class="fa-solid fa-credit-card"></i> Payment Details</strong>
+            <p id="track-payment-text" style="color: var(--text-secondary); line-height: 1.35;"></p>
+          </div>
+        </div>
+
+        <!-- Reorder Button -->
+        <div style="margin-top: 24px; text-align: center;">
+          <button class="btn-submit" id="track-reorder-btn" onclick="handleReorder()" style="display: inline-flex; width: auto; padding: 12px 32px;">
+            <i class="fa-solid fa-rotate-right"></i> Reorder These Items
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    let currentOrder = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('id');
+
+      if (!orderId) {
+        // Fetch most recent order for logged-in user
+        if (State.token) {
+          try {
+            const res = await apiRequest('/orders');
+            if (res.data && res.data.length > 0) {
+              loadOrderDetails(res.data[0].orderId);
+              return;
+            }
+          } catch(e) {}
+        }
+        showOrderError();
+        return;
+      }
+
+      await loadOrderDetails(orderId);
+    });
+
+    async function loadOrderDetails(orderId) {
+      try {
+        const res = await apiRequest(`/orders/${orderId}`);
+        currentOrder = res.data;
+        renderOrderDetails(currentOrder);
+      } catch (err) {
+        showOrderError();
+      }
+    }
+
+    function showOrderError() {
+      document.getElementById('order-loading-view').style.display = 'none';
+      document.getElementById('order-content-view').style.display = 'none';
+      document.getElementById('order-error-view').style.display = 'block';
+    }
+
+    function renderOrderDetails(order) {
+      document.getElementById('order-loading-view').style.display = 'none';
+      document.getElementById('order-error-view').style.display = 'none';
+      document.getElementById('order-content-view').style.display = 'block';
+
+      document.getElementById('track-order-id').textContent = order.orderId;
+      document.getElementById('track-store-info').innerHTML = `Store: <strong>${order.restaurantName}</strong> (${order.orderType === 'fresh' ? 'SAVORA Fresh Grocery' : 'Restaurant Dining'})`;
+      
+      const statusPill = document.getElementById('track-status-pill');
+      statusPill.textContent = order.orderStatus;
+      statusPill.className = `order-status-badge ${order.orderStatus.split('/')[0]}`;
+
+      const dateObj = new Date(order.createdAt);
+      document.getElementById('track-order-time').textContent = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', ' + dateObj.toLocaleDateString();
+
+      // Update Stepper Pipeline
+      updateStepperUI(order.orderStatus);
+
+      // Latest Status message
+      const history = order.statusHistory || [];
+      const latestMsg = history.length > 0 ? history[history.length - 1].message : 'Order processing nicely.';
+      document.getElementById('track-status-message').textContent = latestMsg;
+
+      // Delivery partner
+      if (order.deliveryPartner) {
+        document.getElementById('partner-name').textContent = order.deliveryPartner.name || 'Rahul Kumar';
+        document.getElementById('partner-vehicle').textContent = order.deliveryPartner.vehicle || 'KA-05-EV-4092';
+      }
+
+      // Items
+      const itemsContainer = document.getElementById('track-items-list');
+      itemsContainer.innerHTML = order.items.map(item => `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            ${item.image ? `<img src="${item.image}" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover;" />` : ''}
+            <div>
+              <div style="font-weight: 700; font-size: 0.92rem;">${item.name}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">${item.unit || ''} × ${item.quantity}</div>
+            </div>
+          </div>
+          <div style="font-weight: 800; font-size: 0.95rem;">₹${item.price * item.quantity}</div>
+        </div>
+      `).join('');
+
+      // Bill
+      document.getElementById('track-subtotal').textContent = `₹${order.subtotal}`;
+      document.getElementById('track-delivery').innerHTML = order.deliveryFee === 0 ? '<strong style="color: var(--primary);">FREE</strong>' : `₹${order.deliveryFee}`;
+      
+      const discRow = document.getElementById('track-discount-row');
+      if (order.discount > 0) {
+        discRow.style.display = 'flex';
+        document.getElementById('track-discount-label').textContent = `Discount (${order.couponCode || 'Coupon'})`;
+        document.getElementById('track-discount').textContent = `-₹${order.discount}`;
+      } else {
+        discRow.style.display = 'none';
+      }
+
+      document.getElementById('track-total').textContent = `₹${order.totalAmount}`;
+
+      // Address & payment
+      document.getElementById('track-address-text').textContent = `${order.address.name} (${order.address.phone}) • ${order.address.street}, ${order.address.area}, ${order.address.city} - ${order.address.pincode}`;
+      document.getElementById('track-payment-text').textContent = `${order.paymentMethod} • Status: ${order.paymentStatus} ${order.paymentDetails?.transactionId ? `(Txn: ${order.paymentDetails.transactionId})` : ''}`;
+    }
+
+    function updateStepperUI(status) {
+      const steps = ['Placed', 'Confirmed', 'Preparing/Packing', 'Out for Delivery', 'Delivered'];
+      const currentIdx = steps.indexOf(status);
+
+      const progressWidths = [10, 32, 55, 78, 100];
+      const progressBar = document.getElementById('track-progress-bar');
+      if (progressBar) {
+        progressBar.style.width = `${progressWidths[Math.max(0, currentIdx)]}%`;
+      }
+
+      for (let i = 1; i <= 5; i++) {
+        const node = document.getElementById(`step-node-${i}`);
+        if (!node) continue;
+
+        node.classList.remove('completed', 'active');
+        if (i - 1 < currentIdx) {
+          node.classList.add('completed');
+        } else if (i - 1 === currentIdx) {
+          node.classList.add('active');
+        }
+      }
+
+      const advBtn = document.getElementById('advance-demo-status-btn');
+      if (advBtn) {
+        if (currentIdx >= steps.length - 1) {
+          advBtn.style.display = 'none';
+        } else {
+          advBtn.style.display = 'inline-flex';
+          advBtn.innerHTML = `<i class="fa-solid fa-forward-step"></i> Demo: Advance to ${steps[currentIdx + 1].split('/')[0]}`;
+        }
+      }
+    }
+
+    async function handleAdvanceStatus() {
+      if (!currentOrder) return;
+      const advBtn = document.getElementById('advance-demo-status-btn');
+      advBtn.disabled = true;
+
+      try {
+        const res = await apiRequest(`/orders/${currentOrder.orderId}/advance-status`, {
+          method: 'PUT'
+        });
+
+        currentOrder = res.data;
+        renderOrderDetails(currentOrder);
+        showToast(res.message);
+      } catch (err) {
+        showToast(err.message || 'Failed to update status', 'error');
+      } finally {
+        advBtn.disabled = false;
+      }
+    }
+
+    async function handleReorder() {
+      if (!currentOrder) return;
+
+      try {
+        const res = await apiRequest(`/orders/${currentOrder.orderId}/reorder`, {
+          method: 'POST'
+        });
+
+        // Add items to cart
+        clearCart();
+        res.items.forEach(it => {
+          addToCart({
+            id: it.itemId || it._id || Math.random().toString(),
+            name: it.name,
+            price: it.price,
+            originalPrice: it.price,
+            image: it.image,
+            unit: it.unit,
+            itemType: it.itemType,
+            restaurantId: res.restaurantId,
+            restaurantName: res.restaurantName
+          });
+        });
+
+        showToast('Items added to cart! Redirecting to checkout...');
+        setTimeout(() => window.location.href = 'checkout.html', 1000);
+      } catch (err) {
+        showToast(err.message || 'Reorder failed', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Information | SAVORA</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="brand-logo">
+        <div class="brand-icon"><i class="fa-solid fa-leaf"></i></div>
+        <span>SAVORA</span>
+        <span class="brand-badge">Account Details</span>
+      </a>
+
+      <div class="nav-actions">
+        <a href="profile.html" class="nav-link-btn">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Back to Profile</span>
+        </a>
+        <a href="index.html" class="nav-link-btn">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </a>
+        <div id="nav-auth-container"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Detailed Profile Page -->
+  <main class="container" style="padding: 36px 20px 64px; max-width: 760px;">
+    
+    <div class="profile-content-card">
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-light);">
+        <div class="profile-user-avatar" id="detail-avatar" style="margin: 0; width: 64px; height: 64px; font-size: 1.6rem;">U</div>
+        <div>
+          <h2 id="detail-header-name" style="font-size: 1.5rem;">User Account</h2>
+          <p id="detail-header-email" style="font-size: 0.88rem; color: var(--text-secondary);">user@savora.com</p>
+        </div>
+      </div>
+
+      <form id="full-detail-form" onsubmit="handleSaveFullDetails(event)">
+        
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 14px; letter-spacing: 0.05em;">
+          Personal Information
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <div class="form-input-box">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="detail-name" required />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div>
+            <label class="form-label">Email Address</label>
+            <div class="form-input-box">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="detail-email" disabled style="opacity: 0.7;" />
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Phone Number</label>
+            <div class="form-input-box">
+              <i class="fa-solid fa-phone"></i>
+              <input type="tel" id="detail-phone" />
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 24px; margin-bottom: 14px; letter-spacing: 0.05em;">
+          Security & Password
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">New Password (leave blank to keep current)</label>
+          <div class="form-input-box">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="detail-pass" placeholder="••••••••" minlength="6" />
+          </div>
+        </div>
+
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 24px; margin-bottom: 14px; letter-spacing: 0.05em;">
+          Notification Preferences
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 0.88rem; cursor: pointer;">
+            <input type="checkbox" checked /> Order status SMS & WhatsApp alerts
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 0.88rem; cursor: pointer;">
+            <input type="checkbox" checked /> Promo coupons & weekly gourmet recommendations
+          </label>
+        </div>
+
+        <div style="display: flex; gap: 14px;">
+          <button type="submit" class="btn-submit" id="detail-save-btn" style="width: auto; padding: 12px 32px;">
+            Save Profile
+          </button>
+          <a href="profile.html" class="filter-btn" style="padding: 12px 24px;">Cancel</a>
+        </div>
+      </form>
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!State.token) {
+        showToast('Please login first', 'info');
+        openAuthModal('login');
+        return;
+      }
+
+      try {
+        const res = await apiRequest('/auth/me');
+        const user = res.user;
+
+        document.getElementById('detail-header-name').textContent = user.name;
+        document.getElementById('detail-header-email').textContent = user.email;
+        document.getElementById('detail-avatar').textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+
+        document.getElementById('detail-name').value = user.name || '';
+        document.getElementById('detail-email').value = user.email || '';
+        document.getElementById('detail-phone').value = user.phone || '';
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    async function handleSaveFullDetails(e) {
+      e.preventDefault();
+      const name = document.getElementById('detail-name').value;
+      const phone = document.getElementById('detail-phone').value;
+      const password = document.getElementById('detail-pass').value;
+      const btn = document.getElementById('detail-save-btn');
+
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+      btn.disabled = true;
+
+      try {
+        const payload = { name, phone };
+        if (password && password.length >= 6) {
+          payload.password = password;
+        }
+
+        const res = await apiRequest('/auth/profile', {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+
+        State.user = res.user;
+        saveState('savora_user', res.user);
+
+        showToast('Account details updated successfully');
+        document.getElementById('detail-header-name').textContent = res.user.name;
+        document.getElementById('detail-pass').value = '';
+      } catch (err) {
+        showToast(err.message || 'Update failed', 'error');
+      } finally {
+        btn.innerHTML = 'Save Profile';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
