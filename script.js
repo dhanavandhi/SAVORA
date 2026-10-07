@@ -3,14 +3,12 @@
  * Complete Frontend Controller & API Integration
  */
 
- // API Configuration
-// Local development uses localhost:5000.
-// Production (Render) uses the same deployed service's /api path.
+ // SAVORA API Configuration
 const API_BASE =
   window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1'
     ? 'http://localhost:5000/api'
-    : '/api';
+    : 'https://savora-8b0x.onrender.com/api';
 
 // ==========================================
 // STATE MANAGEMENT & LOCAL STORAGE
