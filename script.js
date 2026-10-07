@@ -3,10 +3,14 @@
  * Complete Frontend Controller & API Integration
  */
 
-// API Configuration with dynamic fallback
-const API_BASE = window.location.origin.includes('localhost:5000') || window.location.origin.includes('127.0.0.1:5000')
-  ? '/api'
-  : 'http://localhost:5000/api';
+ // API Configuration
+// Local development uses localhost:5000.
+// Production (Render) uses the same deployed service's /api path.
+const API_BASE =
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000/api'
+    : '/api';
 
 // ==========================================
 // STATE MANAGEMENT & LOCAL STORAGE
